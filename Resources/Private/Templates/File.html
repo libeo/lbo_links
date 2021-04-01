@@ -1,0 +1,52 @@
+<html xmlns:f="http://typo3.org/ns/TYPO3/CMS/Fluid/ViewHelpers" xmlns:al="http://typo3.org/ns/Libeo/LboLinks/ViewHelpers" data-namespace-typo3-fluid="true">
+
+<f:layout name="Default" />
+
+<f:section name="wrap">|</f:section>
+
+<f:section name="tag">
+    <al:spaceless>
+        <f:variable name="file" value="{data.link.file.uid -> al:file()}" />
+        <f:variable name="file_description" value="file-description-nopadding" />
+
+        <f:if condition="{data.link.isBlank}">
+            <f:then><a href="{data.link.url}" class="is-external {data.link.class}" target="_blank" {data.link.attributes -> f:format.raw()}></f:then>
+            <f:else><a href="{data.link.url}" class="{data.link.class}" {data.link.attributes -> f:format.raw()}></f:else>
+        </f:if>
+    </al:spaceless>
+</f:section>
+
+<f:section name="text">
+    <al:spaceless>
+        <f:variable name="file" value="{data.link.file.uid -> al:file()}" />
+        <f:if condition="{file}">
+            <f:then>
+                {data.link.text -> f:format.raw()}
+                <span class="file-size">
+                    ({file.properties.size -> al:format.bytes()})
+                    <f:if condition="{data.link.isBlank}">
+                        <f:render section="external" />
+                    </f:if>
+                </span>
+            </f:then>
+            <f:else>{data.link.text -> f:format.raw()}</f:else>
+        </f:if>
+    </al:spaceless>
+</f:section>
+
+<f:section name="description">
+    <al:spaceless>
+        </a></span>
+        <f:if condition="{file.properties.description}">
+            <span class="{file_description} {show_description}">{file.properties.description -> f:format.raw()}</span>
+        </f:if>
+    </al:spaceless>
+</f:section>
+
+<f:section name="external">
+    <al:spaceless>
+        {f:translate(key: 'url.external')}
+    </al:spaceless>
+</f:section>
+
+</html>

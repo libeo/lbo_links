@@ -1,0 +1,52 @@
+plugin.tx_lbolinks {
+
+    renderer = FLUIDTEMPLATE
+    renderer {
+		templateRootPaths {
+			0 = EXT:lbo_links/Resources/Private/Templates/
+			1 = {$plugin.tx_lbolinks.view.templateRootPath}
+		}
+
+		partialRootPaths {
+			0 = EXT:lbo_links/Resources/Private/Partials/
+			1 = {$plugin.tx_lbolinks.view.partialRootPath}
+		}
+
+		layoutRootPaths {
+			0 = EXT:lbo_links/Resources/Private/Layouts/
+			1 = {$plugin.tx_lbolinks.view.layoutRootPath}
+		}
+
+        extbase.controllerExtensionName = lbo_links
+
+        settings {
+            siteAssets = {$plugin.tx_lbolinks.settings.siteAssets}
+            dateFormat = {$plugin.tx_lbolinks.settings.dateFormat}
+            siteDateFormat = {$plugin.tx_lbolinks.settings.siteDateFormat}
+            assetsPath = {$path.public.assets}
+        }
+
+        variables {
+        }
+    }
+
+    types {
+        # Generic link
+        file {
+            condition {
+                type = file
+            }
+            rendering < plugin.tx_lbolinks.renderer
+            rendering.templateName = file
+        }
+
+        # Blank link
+        blank {
+            condition {
+                target = blank
+            }
+            rendering < plugin.tx_lbolinks.renderer
+            rendering.templateName = blank
+        }
+    }
+}

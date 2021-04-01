@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<xliff version="1.0">
+    <file source-language="en" datatype="plaintext" original="messages" date="2016-05-31T11:27:46Z" product-name="lbo_links">
+        <header/>
+        <body>
+            <trans-unit id="file.modified"><source>Updated on</source></trans-unit>
+            <trans-unit id="url.external"><source>This link will open in a new window</source></trans-unit>
+        </body>
+    </file>
+</xliff>

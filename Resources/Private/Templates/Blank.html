@@ -1,0 +1,21 @@
+<html xmlns:f="http://typo3.org/ns/TYPO3/CMS/Fluid/ViewHelpers" xmlns:al="http://typo3.org/ns/Libeo/LboLinks/ViewHelpers" data-namespace-typo3-fluid="true">
+
+<f:layout name="Default" />
+
+<f:section name="wrap">|</f:section>
+
+<f:section name="tag">
+    <a href="{data.link.url}" title="{data.link.title}" class="{data.link.class} is-external" target="_blank" {data.link.attributes -> f:format.raw()}>
+</f:section>
+
+<f:section name="text">
+    <al:spaceless>
+        {data.link.text -> f:format.raw()}<span class="visuallyhidden">{f:translate(key: 'url.external')}</span>
+    </al:spaceless>
+</f:section>
+
+<f:section name="description">
+    </a>
+</f:section>
+
+</html>
