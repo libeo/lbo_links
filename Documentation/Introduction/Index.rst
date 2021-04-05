@@ -9,7 +9,7 @@ Introduction
 What does it do?
 ================
 
-Use to add styles on external, internal and files links in frontend contents.
+Use to add styles on externals, internals and files links in frontend contents.
 
 Screenshots
 ===========

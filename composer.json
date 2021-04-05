@@ -1,6 +1,8 @@
 {
     "name": "libeo/lbo_links",
     "type": "typo3-cms-extension",
+    "description": "Add styles on external, internal and files links in frontend contents.",
+    "license": "AGPL-3.0",
     "authors": [
         {
             "name": "Pierre Boivin",

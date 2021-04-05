@@ -26,7 +26,7 @@ Extension Name
 
 :License:
    This extension documentation is published under the
-   `CC BY-NC-SA 4.0 <https://creativecommons.org/licenses/by-nc-sa/4.0/>`__ (Creative Commons)
+   `AGPL-3.0 <https://www.gnu.org/licenses/agpl-3.0.fr.html>`__ (GNU Affero)
    license
 
 **TYPO3**
