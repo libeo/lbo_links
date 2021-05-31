@@ -12,6 +12,11 @@
     "require": {
         "typo3/cms-core": "^9 || ^10"
     },
+    "extra": {
+        "typo3/cms": {
+            "extension-key": "lbo_links"
+        }
+    },
     "autoload": {
         "psr-4": {
             "Libeo\\LboLinks\\": "Classes/"
