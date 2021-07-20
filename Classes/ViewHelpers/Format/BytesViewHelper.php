@@ -22,23 +22,33 @@ class BytesViewHelper extends AbstractViewHelper implements ViewHelperInterface
     protected static $units = [];
 
     /**
+     * Initialize arguments.
+     *
+     * @return void
+     * @api
+     */
+    public function initializeArguments()
+    {
+        $this->registerArgument('decimals', 'int', 'The number of digits after the decimal point', false, 0);
+        $this->registerArgument('decimalSeparator', 'string', 'The decimal point character', false, '.');
+        $this->registerArgument('thousandsSeparator', 'string', 'The character for grouping the thousand digits', false, ',');
+    }
+
+    /**
      * Render the supplied byte count as a human readable string.
      *
      * @param int $value The incoming data to convert, or NULL if VH children should be used
-     * @param int $decimals The number of digits after the decimal point
-     * @param string $decimalSeparator The decimal point character
-     * @param string $thousandsSeparator The character for grouping the thousand digits
      * @return string Formatted byte count
      * @api
      */
-    public function render($value = null, $decimals = 0, $decimalSeparator = '.', $thousandsSeparator = ',')
+    public function render()
     {
         return static::renderStatic(
             [
-                'value' => $value,
-                'decimals' => $decimals,
-                'decimalSeparator' => $decimalSeparator,
-                'thousandsSeparator' => $thousandsSeparator
+                'value' => $this->arguments['value'],
+                'decimals' => $this->arguments['decimals'],
+                'decimalSeparator' => $this->arguments['decimalSeparator'],
+                'thousandsSeparator' => $this->arguments['thousandsSeparator']
             ],
             $this->buildRenderChildrenClosure(),
             $this->renderingContext
@@ -56,6 +66,7 @@ class BytesViewHelper extends AbstractViewHelper implements ViewHelperInterface
     public static function renderStatic(array $arguments, \Closure $renderChildrenClosure, RenderingContextInterface $renderingContext)
     {
         $value = $arguments['value'];
+
         if ($value === null) {
             $value = $renderChildrenClosure();
         }
@@ -74,6 +85,8 @@ class BytesViewHelper extends AbstractViewHelper implements ViewHelperInterface
         $pow = floor(($bytes ? log($bytes) : 0) / log(1024));
         $pow = min($pow, count(self::$units) - 1);
         $bytes /= pow(2, (10 * $pow));
+
+        //
 
         return sprintf(
             '%s&nbsp;%s',
