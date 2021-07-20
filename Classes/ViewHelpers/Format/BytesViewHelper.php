@@ -86,8 +86,6 @@ class BytesViewHelper extends AbstractViewHelper implements ViewHelperInterface
         $pow = min($pow, count(self::$units) - 1);
         $bytes /= pow(2, (10 * $pow));
 
-        //
-
         return sprintf(
             '%s&nbsp;%s',
             number_format(round($bytes, 4 * $arguments['decimals']), $arguments['decimals'], $arguments['decimalSeparator'], $arguments['thousandsSeparator']),
