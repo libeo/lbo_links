@@ -112,11 +112,7 @@ class LinkConfiguration
      */
     public function setUrl($url)
     {
-        if (substr($url, 0, 1) === '/') {
-            $this->url = substr($url, 1);
-        } else {
-            $this->url = $url;
-        }
+        $this->url = $url;
     }
 
     /**
