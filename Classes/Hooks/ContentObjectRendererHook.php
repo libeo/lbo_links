@@ -142,6 +142,12 @@ class ContentObjectRendererHook
                 return false;
             }
         }
+        if (isset($condition['regex'])) {
+            preg_match($condition['regex'], $linkConfiguration->getUrl(), $match);
+            if (!isset($match[0])) {
+                return false;
+            }
+        }
 
         return true;
     }
