@@ -56,15 +56,15 @@ class ContentObjectRendererHook
             $params['finalTagParts']['TYPE'] = 'tel';
         }
 
-        $configuration->setType(isset($params['finalTagParts']['TYPE']) ? $params['finalTagParts']['TYPE'] : '');
-        $configuration->setUrl(isset($params['finalTagParts']['url']) ? $params['finalTagParts']['url'] : '');
-        $configuration->setTarget($params['tagAttributes']['target']);
-        $configuration->setText(isset($params['linktxt']) ? $params['linktxt'] : '');
-        $configuration->setClass($params['tagAttributes']['class']);
-        $configuration->setTitle($params['tagAttributes']['title']);
-        $configuration->setParameter($params['tagAttributes']['href']);
-        $configuration->setAttributes(isset($params['finalTagParts']['aTagParams']) ? $params['finalTagParts']['aTagParams'] : '');
-        $configuration->setFile(isset($params['linkDetails']['file']) ? $params['linkDetails']['file'] : null);
+        $configuration->setType($params['finalTagParts']['TYPE'] ?? '');
+        $configuration->setUrl($params['finalTagParts']['url'] ?? '');
+        $configuration->setTarget($params['tagAttributes']['target'] ?? '');
+        $configuration->setText($params['linktxt'] ?? '');
+        $configuration->setClass($params['tagAttributes']['class'] ?? '');
+        $configuration->setTitle($params['tagAttributes']['title'] ?? '');
+        $configuration->setParameter($params['tagAttributes']['href'] ?? '');
+        $configuration->setAttributes($params['finalTagParts']['aTagParams'] ?? '');
+        $configuration->setFile($params['linkDetails']['file'] ?? null);
 
         return $configuration;
     }
@@ -100,6 +100,12 @@ class ContentObjectRendererHook
                 $linkOverride->$setter(trim($matches[1]));
             }
         }
+        // Remove comments and new lines
+        $linkOverride->setContent(
+            preg_replace('/\n/', '',
+                preg_replace('/<!--(.|\s)*?-->/', '', $linkOverride->getContent())
+            )
+        );
 
         return $linkOverride;
     }
