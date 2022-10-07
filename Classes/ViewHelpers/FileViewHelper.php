@@ -12,15 +12,11 @@ use TYPO3\CMS\Core\Resource\Exception\ResourceDoesNotExistException;
 use TYPO3\CMS\Core\Resource\File;
 use TYPO3\CMS\Core\Resource\Folder;
 use TYPO3\CMS\Core\Resource\ResourceFactory;
-use TYPO3\CMS\Core\Utility\StringUtility;
+use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3Fluid\Fluid\Core\ViewHelper\AbstractViewHelper;
 
 /**
- * Returns the size of the provided file in bytes
- *
- * @author Björn Fromme <fromme@dreipunktnull.com>, dreipunktnull
- * @package Vhs
- * @subpackage ViewHelpers\Media
+ * Returns the file infos
  */
 class FileViewHelper extends AbstractViewHelper
 {
@@ -60,7 +56,8 @@ class FileViewHelper extends AbstractViewHelper
     private function resolveFalReference($reference)
     {
         try {
-            $fileOrFolderObject = ResourceFactory::getInstance()->getFileObject($reference);
+            $resourceFactory = GeneralUtility::makeInstance(ResourceFactory::class);
+            $fileOrFolderObject = $resourceFactory->getFileObject($reference);
             // Link to a folder or file
             if ($fileOrFolderObject instanceof File || $fileOrFolderObject instanceof Folder) {
                 return $fileOrFolderObject;

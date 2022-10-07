@@ -1,4 +1,5 @@
-<html xmlns:f="http://typo3.org/ns/TYPO3/CMS/Fluid/ViewHelpers" xmlns:al="http://typo3.org/ns/Libeo/LboLinks/ViewHelpers" data-namespace-typo3-fluid="true">
+<html xmlns:f="http://typo3.org/ns/TYPO3/CMS/Fluid/ViewHelpers"
+      data-namespace-typo3-fluid="true">
 
 <f:layout name="Default" />
 
@@ -9,9 +10,9 @@
 </f:section>
 
 <f:section name="text">
-    <al:spaceless>
+    <f:spaceless>
         {data.link.text -> f:format.raw()}<span class="visuallyhidden">{f:translate(key: 'url.external')}</span>
-    </al:spaceless>
+    </f:spaceless>
 </f:section>
 
 <f:section name="description">
