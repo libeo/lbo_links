@@ -77,6 +77,6 @@ class LinkOverride
      */
     public function setContent($content)
     {
-        $this->content = $content;
+        $this->content = trim($content);
     }
 }
