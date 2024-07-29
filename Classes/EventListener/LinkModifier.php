@@ -4,7 +4,6 @@ namespace Libeo\LboLinks\EventListener;
 
 use Libeo\LboLinks\Domain\Model\LinkConfiguration;
 use Libeo\LboLinks\Domain\Model\LinkOverride;
-use Libeo\LboLinks\Utility\TagParsingUtility;
 use TYPO3\CMS\Core\LinkHandling\LinkService;
 use TYPO3\CMS\Core\Resource\Exception\InsufficientFolderAccessPermissionsException;
 use TYPO3\CMS\Core\Resource\File;
@@ -28,7 +27,10 @@ class LinkModifier
         $linkOverride = $this->getLinkOverride($event, $linkConfiguration);
         if ($linkOverride) {
             $event->setLinkResult($event->getLinkResult()->withLinkText(htmlspecialchars_decode($linkOverride->getContent())));
-            $event->setLinkResult($event->getLinkResult()->withAttributes($this->tagStringToAttributesArray($linkOverride->getTag()), true));
+
+            if ($attrsArray = $this->tagStringToAttributesArray($linkOverride->getTag())) {
+                $event->setLinkResult($event->getLinkResult()->withAttributes($attrsArray), true);
+            }
         }
     }
 
@@ -44,51 +46,24 @@ class LinkModifier
         $configuration->setText($link->getLinkText());
         $configuration->setClass($link->getAttribute('class'));
         $configuration->setTitle($link->getAttribute('title'));
-        $configuration->setAttributes($this->attributesArrayToString($link->getAttributes()));
+        $configuration->setAttributes(GeneralUtility::implodeAttributes($link->getAttributes()));
         $configuration->setFile($link->getType() === LinkService::TYPE_FILE ? $this->getFileFromUrl($link->getUrl()) : null);
 
         return $configuration;
     }
 
-
-    private function attributesArrayToString(array $attributes): string
-    {
-        $attributesString = '';
-
-        foreach ($attributes as $key => $value) {
-            $attributesString .= " {$key}=\"{$value}\" ";
-        }
-
-        return $attributesString;
-    }
-
-    private function tagStringToAttributesArray(string $tag): array
+    private function tagStringToAttributesArray(string $tag): ?array
     {
         libxml_use_internal_errors(true);
-        $anchor = simplexml_load_string(TagParsingUtility::anchorIsClosed($tag) ? $tag : $tag .= '</a>');
-        $errors = libxml_get_errors();
-
-        $redefinedAttributes = [];
-        foreach ($errors as $error) {
-            if ($error->code === 42) { // Redefined html attribute
-                $message = $error->message; // "Attribute {$attr} redefined"
-                $redefinedAttributes[] = substr($message, 10, strrpos($message, ' ') - 10);
-            }
-        }
-
+        $anchor = simplexml_load_string($tag .= '</a>');
         libxml_clear_errors();
-        if (count($redefinedAttributes)) {
-            return $this->tagStringToAttributesArray(TagParsingUtility::stripDuplicatedAttributes($tag, $redefinedAttributes));
+
+        // simplexml_load_string returns false if the parsed HTML is invalid
+        if (!$anchor) {
+            return null;
         }
 
-        $attributes = $anchor ? (array)$anchor->attributes() : [];
-
-        $attributesArray = [];
-
-        foreach (reset($attributes) as $key => $value) {
-            $attributesArray[$key] = $value;
-        }
-        return $attributesArray;
+        return GeneralUtility::get_tag_attributes($tag);
     }
 
     private function getFileFromUrl(string $url): ?File
