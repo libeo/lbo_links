@@ -9,6 +9,7 @@ use TYPO3\CMS\Core\Resource\Exception\InsufficientFolderAccessPermissionsExcepti
 use TYPO3\CMS\Core\Resource\File;
 use TYPO3\CMS\Core\Resource\StorageRepository;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
+use TYPO3\CMS\Frontend\ContentObject\ContentObjectRenderer;
 use TYPO3\CMS\Frontend\Event\AfterLinkIsGeneratedEvent;
 
 class LinkModifier
@@ -24,7 +25,7 @@ class LinkModifier
     public function __invoke(AfterLinkIsGeneratedEvent $event): void
     {
         $linkConfiguration = $this->getLinkConfiguration($event);
-        $linkOverride = $this->getLinkOverride($event, $linkConfiguration);
+        $linkOverride = $this->getLinkOverride($linkConfiguration);
         if ($linkOverride) {
             $event->setLinkResult($event->getLinkResult()->withLinkText(htmlspecialchars_decode($linkOverride->getContent())));
 
@@ -40,13 +41,18 @@ class LinkModifier
 
         $link = $event->getLinkResult();
 
+        // Remove href and target from attribute list to prevent duplicate attributes.
+        $attributes = $link->getAttributes();
+        unset($attributes['href']);
+        unset($attributes['target']);
+
         $configuration->setType($link->getType() === LinkService::TYPE_TELEPHONE ? 'tel' : $link->getType());
         $configuration->setUrl($link->getUrl());
         $configuration->setTarget($link->getTarget());
         $configuration->setText($link->getLinkText());
         $configuration->setClass($link->getAttribute('class'));
         $configuration->setTitle($link->getAttribute('title'));
-        $configuration->setAttributes(GeneralUtility::implodeAttributes($link->getAttributes()));
+        $configuration->setAttributes(GeneralUtility::implodeAttributes($attributes));
         $configuration->setFile($link->getType() === LinkService::TYPE_FILE ? $this->getFileFromUrl($link->getUrl()) : null);
 
         return $configuration;
@@ -83,14 +89,14 @@ class LinkModifier
         return null;
     }
 
-    private function getLinkOverride(AfterLinkIsGeneratedEvent $event, LinkConfiguration $linkConfiguration): ?LinkOverride
+    private function getLinkOverride(LinkConfiguration $linkConfiguration): ?LinkOverride
     {
         $overrideKey = $this->getOverrideKey($linkConfiguration);
         if ($overrideKey === false) {
             return null;
         }
 
-        $localObjectRenderer = $event->getContentObjectRenderer();
+        $localObjectRenderer = GeneralUtility::makeInstance(ContentObjectRenderer::class);
 
         $localObjectRenderer->start(['link' => $linkConfiguration]);
 
