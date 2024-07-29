@@ -4,6 +4,7 @@ namespace Libeo\LboLinks\EventListener;
 
 use Libeo\LboLinks\Domain\Model\LinkConfiguration;
 use Libeo\LboLinks\Domain\Model\LinkOverride;
+use Libeo\LboLinks\Utility\TagParsingUtility;
 use TYPO3\CMS\Core\LinkHandling\LinkService;
 use TYPO3\CMS\Core\Resource\Exception\InsufficientFolderAccessPermissionsException;
 use TYPO3\CMS\Core\Resource\File;
@@ -52,13 +53,10 @@ class LinkModifier
 
     private function attributesArrayToString(array $attributes): string
     {
-        $individuallyManagedAttributes = ['href', 'target'];
         $attributesString = '';
 
         foreach ($attributes as $key => $value) {
-            if(!in_array($key, $individuallyManagedAttributes)) {
-                $attributesString .= " {$key}=\"{$value}\" ";
-            }
+            $attributesString .= " {$key}=\"{$value}\" ";
         }
 
         return $attributesString;
@@ -66,14 +64,30 @@ class LinkModifier
 
     private function tagStringToAttributesArray(string $tag): array
     {
-        $attributes = (array)simplexml_load_string($tag .= '</a>')->attributes();
+        libxml_use_internal_errors(true);
+        $anchor = simplexml_load_string(TagParsingUtility::anchorIsClosed($tag) ? $tag : $tag .= '</a>');
+        $errors = libxml_get_errors();
+
+        $redefinedAttributes = [];
+        foreach ($errors as $error) {
+            if ($error->code === 42) { // Redefined html attribute
+                $message = $error->message; // "Attribute {$attr} redefined"
+                $redefinedAttributes[] = substr($message, 10, strrpos($message, ' ') - 10);
+            }
+        }
+
+        libxml_clear_errors();
+        if (count($redefinedAttributes)) {
+            return $this->tagStringToAttributesArray(TagParsingUtility::stripDuplicatedAttributes($tag, $redefinedAttributes));
+        }
+
+        $attributes = $anchor ? (array)$anchor->attributes() : [];
 
         $attributesArray = [];
 
         foreach (reset($attributes) as $key => $value) {
             $attributesArray[$key] = $value;
         }
-
         return $attributesArray;
     }
 
