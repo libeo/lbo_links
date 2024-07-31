@@ -5,12 +5,12 @@ namespace Libeo\LboLinks\EventListener;
 use Libeo\LboLinks\Domain\Model\LinkConfiguration;
 use Libeo\LboLinks\Domain\Model\LinkOverride;
 use TYPO3\CMS\Core\LinkHandling\LinkService;
-use TYPO3\CMS\Core\Resource\Exception\InsufficientFolderAccessPermissionsException;
-use TYPO3\CMS\Core\Resource\File;
-use TYPO3\CMS\Core\Resource\StorageRepository;
+use TYPO3\CMS\Core\LinkHandling\TypoLinkCodecService;
+use TYPO3\CMS\Core\Resource\FileInterface;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Frontend\ContentObject\ContentObjectRenderer;
 use TYPO3\CMS\Frontend\Event\AfterLinkIsGeneratedEvent;
+use TYPO3\CMS\Frontend\Typolink\LinkResultInterface;
 
 class LinkModifier
 {
@@ -53,7 +53,7 @@ class LinkModifier
         $configuration->setClass($link->getAttribute('class'));
         $configuration->setTitle($link->getAttribute('title'));
         $configuration->setAttributes(GeneralUtility::implodeAttributes($attributes));
-        $configuration->setFile($link->getType() === LinkService::TYPE_FILE ? $this->getFileFromUrl($link->getUrl()) : null);
+        $configuration->setFile($link->getType() === LinkService::TYPE_FILE ? $this->getFileFromLinkResult($link) : null);
 
         return $configuration;
     }
@@ -72,21 +72,19 @@ class LinkModifier
         return GeneralUtility::get_tag_attributes($tag);
     }
 
-    private function getFileFromUrl(string $url): ?File
+    private function getFileFromLinkResult(LinkResultInterface $link): ?FileInterface
     {
-        $defaultStorage = GeneralUtility::makeInstance(StorageRepository::class)->getDefaultStorage();
+        $typoLinkCodecService = GeneralUtility::makeInstance(TypoLinkCodecService::class);
+        $contentObjectRenderer = GeneralUtility::makeInstance(ContentObjectRenderer::class);
+        $linkService = GeneralUtility::makeInstance(LinkService::class);
 
-        try {
-            $fileIdentifier =  str_starts_with($url, '/fileadmin/')
-                ? substr($url, 10)
-                : $url;
-
-            return $defaultStorage->getFileByIdentifier($fileIdentifier);
-
-        } catch (InsufficientFolderAccessPermissionsException $e) {
-            // do nothing
-        }
-        return null;
+        // Find the file using LinkService like \TYPO3\CMS\Frontend\Typolink\LinkFactory
+        $linkConfiguration = $link->getLinkConfiguration();
+        $linkParameterParts = $typoLinkCodecService->decode($linkConfiguration['parameter'] ?? '');
+        $modifiedLinkParameterString = $contentObjectRenderer->stdWrap($linkParameterParts['url'], $linkConfiguration['parameter.']);
+        $linkParameterParts = $typoLinkCodecService->decode((string)($modifiedLinkParameterString ?? ''));
+        $linkDetails = $linkService->resolve($linkParameterParts['url']);
+        return $linkDetails['file'];
     }
 
     private function getLinkOverride(LinkConfiguration $linkConfiguration): ?LinkOverride
