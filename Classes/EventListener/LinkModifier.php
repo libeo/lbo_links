@@ -83,7 +83,11 @@ class LinkModifier
         $modifiedLinkParameterString = $contentObjectRenderer->stdWrap($linkParameterParts['url'], $linkConfiguration['parameter.']);
         $linkParameterParts = $typoLinkCodecService->decode((string)($modifiedLinkParameterString ?? ''));
         $linkDetails = $linkService->resolve($linkParameterParts['url']);
-        return $linkDetails['file'];
+        if ($linkDetails['file'] instanceof FileInterface) {
+            return $linkDetails['file'];
+        } else {
+            return null;
+        }
     }
 
     private function getLinkOverride(LinkConfiguration $linkConfiguration): ?LinkOverride
