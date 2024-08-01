@@ -53,7 +53,7 @@ class LinkModifier
         $configuration->setClass($link->getAttribute('class'));
         $configuration->setTitle($link->getAttribute('title'));
         $configuration->setAttributes(GeneralUtility::implodeAttributes($attributes));
-        $configuration->setFile($link->getType() === LinkService::TYPE_FILE ? $this->getFileFromLinkResult($link) : null);
+        $configuration->setFile($link->getType() === LinkService::TYPE_FILE ? $this->getFileFromLinkResult($link, $event->getContentObjectRenderer()) : null);
 
         return $configuration;
     }
@@ -72,10 +72,9 @@ class LinkModifier
         return GeneralUtility::get_tag_attributes($tag);
     }
 
-    private function getFileFromLinkResult(LinkResultInterface $link): ?FileInterface
+    private function getFileFromLinkResult(LinkResultInterface $link, ContentObjectRenderer $contentObjectRenderer): ?FileInterface
     {
         $typoLinkCodecService = GeneralUtility::makeInstance(TypoLinkCodecService::class);
-        $contentObjectRenderer = GeneralUtility::makeInstance(ContentObjectRenderer::class);
         $linkService = GeneralUtility::makeInstance(LinkService::class);
 
         // Find the file using LinkService like \TYPO3\CMS\Frontend\Typolink\LinkFactory
