@@ -16,7 +16,7 @@ class LinkModifier
 {
     public function __construct()
     {
-        $frontendTypoScript = $GLOBALS['TYPO3_REQUEST']->getAttribute('frontend.typoscript');
+        $frontendTypoScript = $GLOBALS['TYPO3_REQUEST'] ? $GLOBALS['TYPO3_REQUEST']->getAttribute('frontend.typoscript') : null;
         if ($frontendTypoScript && $frontendTypoScript->hasSetup()) {
             $this->configuration = $frontendTypoScript->getSetupArray()['plugin.']['tx_lbolinks.'];
         }
@@ -24,6 +24,10 @@ class LinkModifier
 
     public function __invoke(AfterLinkIsGeneratedEvent $event): void
     {
+        // If no configuration was found, do nothing.
+        if (!$this->configuration) {
+            return;
+        }
         $linkConfiguration = $this->getLinkConfiguration($event);
         $linkOverride = $this->getLinkOverride($linkConfiguration);
         if ($linkOverride) {
