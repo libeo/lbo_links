@@ -25,7 +25,7 @@ class LinkModifier
     public function __invoke(AfterLinkIsGeneratedEvent $event): void
     {
         // If no configuration was found, do nothing.
-        if (!$this->configuration) {
+        if (!isset($this->configuration) || !$this->configuration) {
             return;
         }
         $linkConfiguration = $this->getLinkConfiguration($event);
