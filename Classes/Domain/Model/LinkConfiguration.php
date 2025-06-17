@@ -124,10 +124,10 @@ class LinkConfiguration
         if (empty($target)) {
             switch ($this->type) {
                 case 'url':
-                    $target = $GLOBALS['TSFE']->extTarget;
+                    $target = $GLOBALS['TSFE']->extTarget ?? self::TARGET_DEFAULT;
                     break;
                 case 'file':
-                    $target = $GLOBALS['TSFE']->fileTarget;
+                    $target = $GLOBALS['TSFE']->fileTarget ?? self::TARGET_DEFAULT;
                     break;
             }
         }
