@@ -27,7 +27,7 @@ class FileViewHelper extends AbstractViewHelper
      * @return void
      * @api
      */
-    public function initializeArguments(): void
+    public function initializeArguments()
     {
         $this->registerArgument('reference', 'string', 'File reference', false, null);
     }
