@@ -16,9 +16,13 @@ class LinkModifier
 {
     public function __construct()
     {
-        $frontendTypoScript = $GLOBALS['TYPO3_REQUEST'] ? $GLOBALS['TYPO3_REQUEST']->getAttribute('frontend.typoscript') : null;
-        if ($frontendTypoScript && $frontendTypoScript->hasSetup()) {
-            $this->configuration = $frontendTypoScript->getSetupArray()['plugin.']['tx_lbolinks.'];
+        $request = $GLOBALS['TYPO3_REQUEST'] ?? null;
+
+        if ($request) {
+            $frontendTypoScript = $request->getAttribute('frontend.typoscript');
+            if ($frontendTypoScript && $frontendTypoScript->hasSetup()) {
+                $this->configuration = $frontendTypoScript->getSetupArray()['plugin.']['tx_lbolinks.'];
+            }
         }
     }
 
