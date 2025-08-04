@@ -84,7 +84,10 @@ class LinkModifier
         // Find the file using LinkService like \TYPO3\CMS\Frontend\Typolink\LinkFactory
         $linkConfiguration = $link->getLinkConfiguration();
         $linkParameterParts = $typoLinkCodecService->decode($linkConfiguration['parameter'] ?? '');
-        $modifiedLinkParameterString = $contentObjectRenderer->stdWrap($linkParameterParts['url'], $linkConfiguration['parameter.']);
+        $modifiedLinkParameterString = $contentObjectRenderer->stdWrap(
+            $linkParameterParts['url'] ?? '',
+            $linkConfiguration['parameter.'] ?? ''
+        );
         $linkParameterParts = $typoLinkCodecService->decode((string)($modifiedLinkParameterString ?? ''));
         $linkDetails = $linkService->resolve($linkParameterParts['url']);
         if ($linkDetails['file'] instanceof FileInterface) {
