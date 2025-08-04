@@ -2,6 +2,7 @@
 
 namespace Libeo\LboLinks\EventListener;
 
+use DOMDocument;
 use Libeo\LboLinks\Domain\Model\LinkConfiguration;
 use Libeo\LboLinks\Domain\Model\LinkOverride;
 use TYPO3\CMS\Core\LinkHandling\LinkService;
@@ -49,18 +50,13 @@ class LinkModifier
 
         $link = $event->getLinkResult();
 
-        // Remove href and target from attribute list to prevent duplicate attributes.
-        $attributes = $link->getAttributes();
-        unset($attributes['href']);
-        unset($attributes['target']);
-
         $configuration->setType($link->getType() === LinkService::TYPE_TELEPHONE ? 'tel' : $link->getType());
         $configuration->setUrl($link->getUrl());
         $configuration->setTarget($link->getTarget());
         $configuration->setText($link->getLinkText());
         $configuration->setClass($link->getAttribute('class'));
         $configuration->setTitle($link->getAttribute('title'));
-        $configuration->setAttributes(GeneralUtility::implodeAttributes($attributes));
+        $configuration->setAttributes(GeneralUtility::implodeAttributes($link->getAttributes()));
         $configuration->setFile($link->getType() === LinkService::TYPE_FILE ? $this->getFileFromLinkResult($link, $event->getContentObjectRenderer()) : null);
 
         return $configuration;
@@ -88,7 +84,10 @@ class LinkModifier
         // Find the file using LinkService like \TYPO3\CMS\Frontend\Typolink\LinkFactory
         $linkConfiguration = $link->getLinkConfiguration();
         $linkParameterParts = $typoLinkCodecService->decode($linkConfiguration['parameter'] ?? '');
-        $modifiedLinkParameterString = $contentObjectRenderer->stdWrap($linkParameterParts['url'], $linkConfiguration['parameter.']);
+        $modifiedLinkParameterString = $contentObjectRenderer->stdWrap(
+            $linkParameterParts['url'] ?? '',
+            $linkConfiguration['parameter.'] ?? ''
+        );
         $linkParameterParts = $typoLinkCodecService->decode((string)($modifiedLinkParameterString ?? ''));
         $linkDetails = $linkService->resolve($linkParameterParts['url']);
         if ($linkDetails['file'] instanceof FileInterface) {
@@ -124,6 +123,9 @@ class LinkModifier
                 $linkOverride->$setter(trim($matches[1]));
             }
         }
+
+        $this->removeDuplicatedAttributesFromTag($linkOverride);
+
         // Remove comments and new lines
         $linkOverride->setContent(
             preg_replace('/\n/', '',
@@ -174,5 +176,25 @@ class LinkModifier
         }
 
         return true;
+    }
+
+    /**
+     * Some links may end up with duplicated attributes if they are set in both the original link, and the lbo_links template.
+     * This strips the last occurrence of said attributes from the final tag value, making it valid HTML.
+     * Since we know which occurrence is removed, we can control the behavior we want a specific template to have, i.e.
+     * if we want the lbo_link template to completely override attributes from other sources, or vice versa.
+     */
+    private function removeDuplicatedAttributesFromTag(LinkOverride &$linkOverride): void
+    {
+        libxml_use_internal_errors(true);
+        $document = new DOMDocument();
+        // options to be able to save de document without wrapping it in <!DOCTYPE> + <body>
+        $document->loadHTML($linkOverride->getTag(), LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
+
+        // saveHTML() will strip duplicated attributes from the tag string
+        $validAnchor = $document->getElementsByTagName('a')[0]->ownerDocument->saveHTML();
+
+        // remove the closing tag since it's added manually in the CONTENT wrap
+        $linkOverride->setTag(substr($validAnchor, 0, strpos($validAnchor, '</a>')));
     }
 }
