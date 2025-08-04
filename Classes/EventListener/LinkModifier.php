@@ -126,6 +126,7 @@ class LinkModifier
 
         $this->removeDuplicatedAttributesFromTag($linkOverride);
 
+        // Remove comments and new lines
         $linkOverride->setContent(
             preg_replace('/\n/', '',
                 preg_replace('/<!--(.|\s)*?-->/', '', $linkOverride->getContent())
