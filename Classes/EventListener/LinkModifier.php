@@ -39,6 +39,11 @@ class LinkModifier
             $event->setLinkResult($event->getLinkResult()->withLinkText(htmlspecialchars_decode($linkOverride->getContent())));
 
             if ($attrsArray = $this->tagStringToAttributesArray($linkOverride->getTag())) {
+                // Fix double-encoding of '&' in URLs.
+                if (str_contains($attrsArray['href'], '&amp;')) {
+                    $attrsArray['href'] = htmlspecialchars_decode($attrsArray['href']);
+                }
+
                 $event->setLinkResult($event->getLinkResult()->withAttributes($attrsArray), true);
             }
         }
