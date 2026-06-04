@@ -70,11 +70,12 @@ class LinkModifier
     private function tagStringToAttributesArray(string $tag): ?array
     {
         libxml_use_internal_errors(true);
-        $anchor = simplexml_load_string($tag .= '</a>');
+        $completeTag = $tag . '</a>';
+        $isValidAnchor = simplexml_load_string($completeTag);
         libxml_clear_errors();
 
         // simplexml_load_string returns false if the parsed HTML is invalid
-        if (!$anchor) {
+        if (!$isValidAnchor) {
             return null;
         }
 
